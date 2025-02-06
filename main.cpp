@@ -259,6 +259,15 @@ public:
 	Rational operator+(const Rational& other) const
 	{
 		Integer commonDenom = denominator_.findNOK(other.denominator_);
+
+		Integer newNumerator1 = numerator_ * (commonDenom / denominator_);
+		Integer newNumerator2 = other.numerator_ * (commonDenom / other.denominator_);
+
+		Integer resNumerator = newNumerator1 + newNumerator2;
+
+		Rational result(resNumerator, commonDenom);
+		result.reduce();
+		return result;
 	}
 
 
