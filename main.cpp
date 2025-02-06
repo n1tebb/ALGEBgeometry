@@ -259,10 +259,8 @@ public:
 	Rational operator+(const Rational& other) const
 	{
 		Integer commonDenom = denominator_.findNOK(other.denominator_);
-
 		Integer newNumerator1 = numerator_ * (commonDenom / denominator_);
 		Integer newNumerator2 = other.numerator_ * (commonDenom / other.denominator_);
-
 		Integer resNumerator = newNumerator1 + newNumerator2;
 
 		Rational result(resNumerator, commonDenom);
@@ -270,6 +268,41 @@ public:
 		return result;
 	}
 
+	Rational operator-(const Rational& other) const
+	{
+		Integer commonDenom = denominator_.findNOK(other.denominator_);
+		Integer newNumerator1 = numerator_ * (commonDenom / denominator_);
+		Integer newNumerator2 = other.numerator_ * (commonDenom / other.denominator_);
+		Integer resNumerator = newNumerator1 - newNumerator2;
+
+		Rational result(resNumerator, commonDenom);
+		result.reduce();
+		return result;
+	}
+
+	Rational operator*(const Rational& other) const
+	{
+		Integer commonDenom = denominator_.findNOK(other.denominator_);
+		Integer newNumerator1 = numerator_ * (commonDenom / denominator_);
+		Integer newNumerator2 = other.numerator_ * (commonDenom / other.denominator_);
+		Integer resNumerator = newNumerator1 * newNumerator2;
+
+		Rational result(resNumerator, commonDenom);
+		result.reduce();
+		return result;
+	}
+
+	Rational operator/(const Rational& other) const
+	{
+		Integer commonDenom = denominator_.findNOK(other.denominator_);
+		Integer newNumerator1 = numerator_ * (commonDenom / denominator_);
+		Integer newNumerator2 = other.numerator_ * (commonDenom / other.denominator_);
+		Integer resNumerator = newNumerator1 / newNumerator2;
+
+		Rational result(resNumerator, commonDenom);
+		result.reduce();
+		return result;
+	}
 
 	friend std::ostream& operator<<(std::ostream& os, const Rational& obj)
 	{
@@ -369,7 +402,7 @@ public:
 		return Real(wholePart_ - other.wholePart_, fractionalPart_ - other.fractionalPart_);
 	}
 
-	Real operator+(const Real& other) const
+	Real operator*(const Real& other) const
 	{
 		return Real(wholePart_ - other.wholePart_, fractionalPart_ - other.fractionalPart_);
 	}
@@ -443,6 +476,25 @@ int main()
 
 	Rational r(a, b);
 	std::cout << "Дробь r: " << r << "\n";
+
+	Real real1(5, Rational(Integer(3), Integer(4)));
+	Real real2(3, Rational(Integer(1), Integer(2)));
+	Real real3(7.25);
+
+	std::cout << "Действительные числа: \n";
+	std::cout << "real1: " << real1 << "\n";
+	std::cout << "real2: " << real2 << "\n";
+	std::cout << "real3: " << real3 << "\n\n";
+
+	Real sum = real1 + real2;
+	Real diff = real1 - real2;
+	Real mnoj = real1 * real2;
+	Real dele = real1 / real2;
+
+	std::cout << "сложение: real1 + real2 = " << sum << "\n";
+	std::cout << "Вычитание: real1 - real2 = " << diff << "\n";
+	std::cout << "Умножение: real1 * real2 = " << mnoj << "\n";
+	std::cout << "Деление: rea1 / real2 = " << dele << "\n\n";
 
 	return 0;
 }
