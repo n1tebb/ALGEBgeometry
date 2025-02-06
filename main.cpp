@@ -79,7 +79,7 @@ public:
 		return (a + b) == 1;
 	}
 
-	Integer findNOD(const Integer& b)
+	Integer findNOD(const Integer& b) const
 	{
 		unsigned x = getUnits();
 		unsigned y = b.getUnits();
@@ -98,7 +98,7 @@ public:
 		return Integer(x + y);
 	}
 
-	Integer findNOK(const Integer& b)
+	Integer findNOK(const Integer& b) const
 	{
 		Integer nok = findNOD(b);
 		unsigned nokUnits = (getUnits() / nok.getUnits()) * b.getUnits();
@@ -189,7 +189,6 @@ public:
 		return temp;
 	}
 
-
 	Integer& operator--()
 	{
 		if (sign_)
@@ -214,14 +213,11 @@ public:
 		return temp;
 	}
 
-
 	friend std::ostream& operator<<(std::ostream& os, const Integer obj)
 	{
 		os << obj.getValue();
 		return os;
 	}
-
-
 
 private:
 	bool sign_;
@@ -243,6 +239,15 @@ public:
 		}
 	}
 
+	Integer getNumerator() const
+	{
+		return numerator_;
+	}
+
+	Integer getDenominator() const
+	{
+		return denominator_;
+	}
 
 	void reduce()
 	{
@@ -250,6 +255,12 @@ public:
 		numerator_ = Integer(numerator_.getUnits()) / NOD;
 		denominator_ = Integer(denominator_.getUnits()) / NOD;
 	}
+
+	Rational operator+(const Rational& other) const
+	{
+		Integer commonDenom = denominator_.findNOK(other.denominator_);
+	}
+
 
 	friend std::ostream& operator<<(std::ostream& os, const Rational& obj)
 	{
@@ -260,6 +271,122 @@ public:
 private:
 	Integer numerator_;
 	Integer denominator_;
+};
+
+class Real
+{
+private:
+	Integer wholePart_;
+	Rational fractionalPart_;
+
+public:
+	Real() : wholePart_(0), fractionalPart_(Integer(0), Integer(1)) { }
+	
+	void normalize()
+	{
+		if (fractionalPart_.getNumerator().getUnits() >= fractionalPart_.getDenominator().getUnits())
+		{
+			Integer extra = fractionalPart_.getNumerator() / fractionalPart_.getDenominator();
+			wholePart_ += extra;
+			fractionalPart_ = Rational(fractionalPart_.getNumerator() % fractionalPart_.getDenominator(), fractionalPart_.getDenominator());
+		}
+	}
+
+	Real(const Integer& whole, const Rational& factorial) : wholePart_(whole), fractionalPart_(factorial)
+	{
+		normalize();
+	}
+
+	Real(int value) : wholePart_(value), fractionalPart_(Integer(0), Integer(1)) { }
+
+	Real(double value)
+	{
+		wholePart_ = Integer(static_cast<int>(value));
+		double frac = value - static_cast<int>(value);
+		int denom = 1000000;
+		int num = static_cast<int>(frac * denom);
+		fractionalPart_ = Rational(Integer(num), Integer(denom));
+		fractionalPart_.reduce();
+	}
+
+	Integer getWholePart() const 
+	{ 
+		return wholePart_;
+	}
+
+	Rational getFractionalPart() const
+	{
+		return fractionalPart_;
+	}
+
+	void setWholePart(const Integer& whole)
+	{
+		wholePart_ = whole;
+	}
+
+	void setFractionalPart(const Rational& fractional)
+	{
+		fractionalPart_ = fractional;
+		normalize();
+	}
+
+	bool isDeci() const 
+	{
+		return fractionalPart_.getDenominator().getUnits() != 0;
+	}
+
+	bool isPositive() const
+	{
+		return wholePart_.isPositive() || fractionalPart_.getNumerator().isPositive();
+	}
+
+	bool isNegative() const
+	{
+		return wholePart_.isNegative() || fractionalPart_.getNumerator().isNegative();
+	}
+
+	bool isSameObj(const Real& other) const
+	{
+		return this == &other;
+	}
+
+	Real operator+(const Real& other) const
+	{
+		return Real(wholePart_ + other.wholePart_, fractionalPart_ + other.fractionalPart_);
+	}
+
+	Real operator-(const Real& other) const
+	{
+		return Real(wholePart_ - other.wholePart_, fractionalPart_ - other.fractionalPart_);
+	}
+
+	Real operator+(const Real& other) const
+	{
+		return Real(wholePart_ - other.wholePart_, fractionalPart_ - other.fractionalPart_);
+	}
+
+
+	Real operator/(const Real& other) const
+	{
+		if (other.wholePart_.getUnits() == 0 && other.fractionalPart_.getNumerator().getUnits() == 0)
+		{
+			std::cerr << "деление на 0";
+			exit(EXIT_FAILURE);
+		}
+		return Real(wholePart_ / other.wholePart_, fractionalPart_ / other.fractionalPart_);
+	}
+
+	Real operator-() const
+	{
+		return Real(wholePart_, fractionalPart_);
+	}
+
+	Real operator+() const
+	{
+		return *this;
+	}
+
+
 };
 
 int main()
@@ -288,7 +415,6 @@ int main()
 	std::cout << "b - простое: " << b.isProstoe() << "\n\n";
 
 	std::cout << "a и b - взаимопростые: " << a.isVzaimProstoe(b) << "\n\n";
-
 
 	Integer nod = a.findNOD(b);
 	Integer nok = a.findNOK(b);
